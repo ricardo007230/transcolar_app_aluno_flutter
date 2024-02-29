@@ -1,0 +1,1 @@
+# transcolar_app_aluno_flutter
