@@ -1,10 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({super.key});
 
+  static List<String> listSchool = [];
+  
+  Future<void> fetchListSchool(int codMun) async {
+    //final response = await http.get(Uri.parse('http::'));
+    final response = await http.get(Uri.parse('http://geoter.transcolares.etg.ufmg.br:8881/appalunos/MG/3134400'));
+    // http://geoter.transcolares.etg.ufmg.br:8881/appalunos/MG/3106200
+    if (response.statusCode == 200){
+      listSchool = json.decode(response.body).cast<String>();
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+
+  void getEscolas() async{
+    SharedPreferences prefs = 
+      await SharedPreferences.getInstance();
+    
+    prefs.setInt('codMun', 10);
+
+    int ?codMun = prefs.getInt('codMun');
+    if(codMun != null){
+      try{
+        // buscando lista de escolas no servidor do transcolar
+        fetchListSchool(codMun);
+
+      } catch(error){
+        // chamar mensagem de erro
+
+      }
+    }else{
+      // chamar mensagem de erro
+    }
+  
+  }
+
   @override
   Widget build(BuildContext context) {
+    getEscolas();
+//    print(listSchool);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(

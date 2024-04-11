@@ -11,7 +11,10 @@ dependencies:
   flutter:
     sdk: flutter
   lottie: ^1.4.3
-
+  sqflite:
+  shared_preferences:
+  http:
+  path:
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
@@ -24,5 +27,6 @@ assets:
   - assets/images/
     -images/friendship.png
     -images/google.png
+    -images/animation.json
 flutter:
   uses-material-design: true

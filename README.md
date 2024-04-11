@@ -1,4 +1,4 @@
-# transcolar_app_aluno_flutter
+# app_aluno
 
 A new Flutter project.
 

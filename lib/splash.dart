@@ -19,13 +19,13 @@ class _SplashState extends State<Splash> {
 
   startTimer(){
     //var duration = const Duration(seconds: 8);
-    var duration = const Duration(seconds: 8);
+    var duration = const Duration(seconds: 1);
     return Timer(duration , route);
   }
 
   route(){
     //Navigator.pushReplacementNamed(context, '/welcome');
-    Navigator.pushReplacementNamed(context, '/signup');
+    Navigator.pushReplacementNamed(context, '/homepage');
   }
 
   @override
@@ -39,9 +39,10 @@ class _SplashState extends State<Splash> {
   Widget content() {
     return Center(
       child: Container(
-      child: Lottie.network(
-        'https://lottie.host/8a54f918-d848-4b6a-88ff-0798c6778815/ZSKYfVBCq4.json'
-      ),
+      // child: Lottie.network(
+      //   'https://lottie.host/93205153-23d0-4f53-8777-16b15e2ccbc4/kpLEX4qddI.json'
+      // ),
+        child: Lottie.asset('assets/images/animation.json'),
       ),
     );
 
