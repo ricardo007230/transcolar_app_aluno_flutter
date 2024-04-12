@@ -8,6 +8,8 @@ class SignupPage extends StatelessWidget {
 
   static List<String> listSchool = [];
   
+
+  // comentário
   Future<void> fetchListSchool(int codMun) async {
     //final response = await http.get(Uri.parse('http::'));
     final response = await http.get(Uri.parse('http://geoter.transcolares.etg.ufmg.br:8881/appalunos/MG/3134400'));
