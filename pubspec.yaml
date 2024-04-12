@@ -15,6 +15,10 @@ dependencies:
   shared_preferences:
   http:
   path:
+  location: ^5.0.0
+  flutter_map:
+  latlong2:
+  permission_handler:
   cupertino_icons: ^1.0.2
 
 dev_dependencies:
