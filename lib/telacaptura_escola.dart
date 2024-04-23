@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:location/location.dart';
 import 'package:latlong2/latlong.dart';
@@ -14,7 +15,7 @@ class TelaCapturaEscola extends StatefulWidget {
 
 class _TelaCapturaEscolaState extends State<TelaCapturaEscola> {
   bool isTracking = false;
-  Color _buttonColor = Colors.green;
+  Color _buttonColor = Colors.orange;
   late MapController mapCont = MapController();
   List<LatLng> point = [];
 
@@ -58,7 +59,16 @@ class _TelaCapturaEscolaState extends State<TelaCapturaEscola> {
                           strokeWidth: 5,
                         ),
                       ]),
-                      //MarkerLayer(markers: getMarkers()),
+                      point.isNotEmpty ?
+                          MarkerLayer(markers: [Marker(
+          point: LatLng(point[point.length - 1].latitude, point[point.length - 1].longitude),
+          height: 20,
+          width: 20,
+          child: const Image(
+            image: AssetImage('assets/images/mark-laranja.png'),
+          ),
+          alignment: const Alignment(0, -0.7),
+        )]) : const MarkerLayer(markers: []),
                       const SimpleAttributionWidget(
                         source: Text('OpenStreetMap contributors'),
                       ),
@@ -71,8 +81,8 @@ class _TelaCapturaEscolaState extends State<TelaCapturaEscola> {
                 onPressed: () async {
                   if (await requestLocationPermission()) {
                     setState(() {
-                      isTracking = !isTracking;
-                      _buttonColor = isTracking ? Colors.red : Colors.green;
+                      isTracking = true;
+                      _buttonColor = Colors.orange;
                     });
 
                     if (isTracking) {
@@ -80,6 +90,7 @@ class _TelaCapturaEscolaState extends State<TelaCapturaEscola> {
                       loc = await getLocation();
                       if (loc.latitude != null && loc.longitude != null) {
                         point.add(LatLng(loc.latitude!, loc.longitude!));
+                        setLocation(loc.longitude!, loc.latitude!);
                       }
                       if (point.isNotEmpty) {
                         mapCont.move(point[point.length - 1], 16);
@@ -97,11 +108,23 @@ class _TelaCapturaEscolaState extends State<TelaCapturaEscola> {
                   backgroundColor: _buttonColor,
                   minimumSize: Size(MediaQuery.of(context).size.width, 70),
                 ),
-                child: Text(
-                  isTracking ? 'Finalizar registro' : 'Registrar casa',
-                  style: const TextStyle(color: Colors.black, fontSize: 20),
+                child: const Text(
+                  'Registrar escola',
+                  style: TextStyle(color: Colors.black, fontSize: 20),
                 ),
               ),
+              Visibility(
+                visible: isTracking,
+                child: const SizedBox(
+                  height: 15,
+                ),
+              ),
+              Visibility(visible: isTracking, child: ElevatedButton(onPressed: () {
+                Navigator.pushReplacementNamed(context, "/mainPage");
+              },child: Text("Completar registro",style: TextStyle(color: Colors.black, fontSize: 20),),style: ElevatedButton.styleFrom(
+                    backgroundColor: _buttonColor,
+                    minimumSize: Size(MediaQuery.of(context).size.width, 70),
+                  ),))
             ]),
       ),
     );
@@ -137,5 +160,11 @@ class _TelaCapturaEscolaState extends State<TelaCapturaEscola> {
 
     final locationData = await location.getLocation();
     return locationData;
+  }
+
+  void setLocation(double lng, double lat) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setDouble('lng_escola', lng);
+    prefs.setDouble('lat_escola', lat);
   }
 }

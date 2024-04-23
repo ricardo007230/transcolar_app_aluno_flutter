@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.white, // Set background color to white
       body: Stack(
         children: [
-          // Background image positioned behind the content
+          //Background image positioned behind the content
           Positioned.fill(
             child: Container(
               decoration: const BoxDecoration(
@@ -206,26 +206,15 @@ class _HomePageState extends State<HomePage> {
                       SharedPreferences prefs =
                           await SharedPreferences.getInstance();
                       prefs.setString('userKey', chave);
-                      prefs.setString('City', tmpMunicipio);
-
-                      // bg.DeviceInfo deviceInfo =
-                      //     await bg.DeviceInfo.getInstance();
-                      // prefs.setString('model', deviceInfo.model);
-                      // prefs.setString(
-                      //     'manufacturer', deviceInfo.manufacturer);
-                      // prefs.setString('platform', deviceInfo.platform);
-                      // prefs.setString('version', deviceInfo.version);
-
-                      // bg.Sensors sensors =
-                      //     await bg.BackgroundGeolocation.sensors;
-                      // prefs.setBool('accelerometer', sensors.accelerometer);
-                      // prefs.setBool('magentometer', sensors.magentometer);
-                      // prefs.setBool('gyroscope', sensors.gyroscope);
+                      prefs.setString('City', selectedMunicipio);
+                      prefs.setString('siglaEst', selectedEstado);
 
                       final munData =
                           await MunDataDatabase.instance.fetchMunData();
 
                       if (munData != null) {
+                        prefs.setInt('codMun', munData['cod_mun']);
+
                         completer.future.then((_) {
                           Navigator.push(
                             context,
@@ -239,6 +228,7 @@ class _HomePageState extends State<HomePage> {
                             .fetchCodMun(selectedMunicipio, selectedEstado);
                         if (codMun != null) {
                           prefs.setInt('codMun', codMun);
+                          print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
                           MunDataDatabase.instance
                               .insertMunData(codMun, selectedEstado, 0);
 

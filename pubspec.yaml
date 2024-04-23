@@ -27,10 +27,11 @@ dev_dependencies:
 
   flutter_lints: ^2.0.0
 
-assets:
-  - assets/images/
-    -images/friendship.png
-    -images/google.png
-    -images/animation.json
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/mark-laranja.png
+    - assets/images/animation.json    
+    - assets/images/TelaFundo.jpg
+

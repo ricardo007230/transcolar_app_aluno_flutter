@@ -11,12 +11,13 @@ import 'package:path/path.dart';
 void main(){
   runApp(MaterialApp(
     routes: {
-      '/':(context) => const MainPage(),
+      '/':(context) => const HomePage(),
+      '/homepage': (context) => const HomePage(),
       '/welcome': (context) => const Welcome(),
       '/signup': (context) => const SignupPage(),
       '/casa': (context) => const TelaCapturaCasa(),
       '/escola': (context) => const TelaCapturaEscola(),
-      //'/homepage':(context) => const HomePage(),
+      '/mainPage':(context) => const MainPage(),
     }
 
   )); 
