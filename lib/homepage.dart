@@ -228,7 +228,6 @@ class _HomePageState extends State<HomePage> {
                             .fetchCodMun(selectedMunicipio, selectedEstado);
                         if (codMun != null) {
                           prefs.setInt('codMun', codMun);
-                          print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
                           MunDataDatabase.instance
                               .insertMunData(codMun, selectedEstado, 0);
 

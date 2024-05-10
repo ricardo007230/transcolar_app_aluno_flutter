@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'database_helper.dart';
+import 'mundata.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -13,8 +15,16 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  String selectedEscola = ' ';
+  final TextEditingController _nomeMaeController = TextEditingController();
+  static String ?selectedEscola  = ' ';
   List<String> listSchool = [];
+
+  // Para selecao de estado e municipio
+  List<String>? estados;
+  List<String>? municipios;
+  String selectedEstado = '';
+  String selectedMunicipio = '';
+  String defaultEstado = '--';
 
   void showError(String mensagem, BuildContext context) {
     showDialog(
@@ -36,9 +46,34 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
+    Future<void> fetchEstados() async {
+    final fetchedEstados = await DatabaseHelper.fetchEstados();
+
+    setState(() {
+      estados = [defaultEstado, ...fetchedEstados];
+      if (fetchedEstados.isNotEmpty) {
+        selectedEstado = defaultEstado;
+      }
+    });
+  }
+
+  Future<void> fetchMunicipios(String estado) async {
+    final fetchedMunicipios = await DatabaseHelper.fetchMunicipios(estado);
+
+    setState(() {
+      municipios = fetchedMunicipios;
+      if (fetchedMunicipios.isNotEmpty) {
+        selectedMunicipio = fetchedMunicipios[0];
+      }
+    });
+  }
+
   Future<void> fetchListSchool(int codMun) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String link = 'http://geoter.transcolares.etg.ufmg.br:8881/appalunos/${prefs.getString('siglaEst')}/${prefs.getInt('codMun').toString()}?authToken=${prefs.getString('userKey')}';
+    final munData = await MunDataDatabase.instance.fetchMunData();
+    final ?codMun = munData['Belo Horizonte'];
+    //String link = 'http://geoter.transcolares.etg.ufmg.br:8881/appalunos/${prefs.getString('siglaEst')}/${prefs.getInt('codMun').toString()}?authToken=${prefs.getString('userKey')}';
+    String link = 'http://geoter.transcolares.etg.ufmg.br:8881/appalunos/${selectedEstado}/${prefs.getInt('codMun').toString()}?authToken=${prefs.getString('userKey')}';
     final response = await http.get(Uri.parse(link));
     if (response.statusCode == 200) {
       List<dynamic> schoolData = json.decode(response.body);
@@ -70,6 +105,7 @@ class _SignupPageState extends State<SignupPage> {
   void initState() {
     super.initState();
     getEscolas();
+    fetchEstados();
   }
 
   @override
@@ -105,7 +141,7 @@ class _SignupPageState extends State<SignupPage> {
             TextField(
               controller: _nomeController,
               decoration: InputDecoration(
-                hintText: "Nome",
+                hintText: "Nome Completo do aluno",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
                   borderSide: BorderSide.none,
@@ -120,9 +156,9 @@ class _SignupPageState extends State<SignupPage> {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: _emailController,
+              controller: _nomeMaeController,
               decoration: InputDecoration(
-                hintText: "Email",
+                hintText: "Nome completo da mãe",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
                   borderSide: BorderSide.none,
@@ -130,12 +166,73 @@ class _SignupPageState extends State<SignupPage> {
                 fillColor: Colors.purple.withOpacity(0.1),
                 filled: true,
                 prefixIcon: const Icon(
-                  Icons.email,
+                  Icons.person,
                   color: Colors.indigo,
                   ),
               ),
             ),
             const SizedBox(height: 20),
+            
+            const Text(
+                    'Estado:',
+                    style: TextStyle(color: Colors.black),    ),
+                  if (estados != null && estados!.isNotEmpty)
+                    DropdownButton<String>(
+                      value: selectedEstado,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedEstado = newValue!;
+                          selectedMunicipio = '';
+                          municipios = [];
+                          fetchMunicipios(selectedEstado);
+                        });
+                      },
+                      items: estados!
+                          .map((estado) => DropdownMenuItem<String>(
+                                value: estado,
+                                child: Text(
+                                  estado,
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                              ))
+                          .toList(),
+                      dropdownColor: Colors.white,
+                      borderRadius: BorderRadius.circular(10.0), // Dropdown border radius
+                    ),
+            
+            const SizedBox(height: 20),
+
+
+              const Text(
+                    'Município:',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  if (municipios != null && municipios!.isNotEmpty)
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 250),
+                        child: DropdownButton<String>(
+                          value: selectedMunicipio,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedMunicipio = newValue!;
+                            });
+                          },
+                          items: municipios!.map<DropdownMenuItem<String>>(
+                              (String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          dropdownColor: Colors.white,
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 16.0),
+
             DropdownButtonFormField<String>(
               value: null,
               isExpanded: true,
@@ -159,10 +256,7 @@ class _SignupPageState extends State<SignupPage> {
                 );
               }).toList(),
               onChanged: (value) {
-                if(value!.length > 20) {
-                  value = value.substring(0,20) + "...";
-                }
-                // handle selected value
+                selectedEscola = value;
               },
             ),
             const SizedBox(height: 20),
@@ -174,8 +268,8 @@ class _SignupPageState extends State<SignupPage> {
                   SharedPreferences prefs = await SharedPreferences.getInstance();
                   String nome = _nomeController.text;
                   String email = _emailController.text;
-                  print(selectedEscola);
-
+                 
+                  prefs.setString('nome_escola', selectedEscola.toString());
                   prefs.setString("Name", nome);
                   prefs.setString('email', email);
                   //prefs.setString('nome_escola', nome_escola);
