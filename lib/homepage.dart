@@ -31,6 +31,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _loadSharedPreferences();
     fetchEstados();
+  
+    
   }
 
   Future<void> _loadSharedPreferences() async {
